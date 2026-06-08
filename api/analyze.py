@@ -8,7 +8,14 @@ from flask import Flask, request, jsonify
 from engine import analyze_alignment
 from graph import build_graph_figure
 
-app = Flask(__name__)
+# Serve the static frontend (public/) from the same Flask app
+PUBLIC_DIR = os.path.join(os.path.dirname(__file__), "..", "public")
+app = Flask(__name__, static_folder=PUBLIC_DIR, static_url_path="")
+
+
+@app.route("/")
+def index():
+    return app.send_static_file("index.html")
 
 
 def _clean_list(items):
@@ -37,3 +44,7 @@ def analyze_endpoint():
         return jsonify(result)
     except Exception as exc:
         return jsonify({"detail": str(exc)}), 500
+
+
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)
