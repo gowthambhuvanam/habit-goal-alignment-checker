@@ -3,19 +3,41 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, abort
 
 from engine import analyze_alignment
 from graph import build_graph_figure
 
-# Serve the static frontend (public/) from the same Flask app
-PUBLIC_DIR = os.path.join(os.path.dirname(__file__), "..", "public")
-app = Flask(__name__, static_folder=PUBLIC_DIR, static_url_path="")
+
+def _find_public():
+    here = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.join(here, "..", "public"),
+        os.path.join(os.getcwd(), "public"),
+        "/var/task/public",
+        "/vercel/path0/public",
+    ]
+    for c in candidates:
+        if os.path.isdir(c):
+            return os.path.abspath(c)
+    return os.path.abspath(candidates[0])
+
+
+PUBLIC_DIR = _find_public()
+app = Flask(__name__)
 
 
 @app.route("/")
 def index():
-    return app.send_static_file("index.html")
+    return send_from_directory(PUBLIC_DIR, "index.html")
+
+
+@app.route("/<path:fname>")
+def static_files(fname):
+    full = os.path.join(PUBLIC_DIR, fname)
+    if os.path.isfile(full):
+        return send_from_directory(PUBLIC_DIR, fname)
+    abort(404)
 
 
 def _clean_list(items):
