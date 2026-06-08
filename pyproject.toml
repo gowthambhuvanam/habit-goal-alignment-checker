@@ -2,7 +2,7 @@
 name = "habit-goal-alignment-checker"
 version = "1.0.0"
 description = "Rule-based habit-to-goal alignment checker with NetworkX and Plotly"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
     "flask==3.0.3",
     "networkx==3.3",
