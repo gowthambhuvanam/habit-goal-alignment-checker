@@ -28,6 +28,7 @@ app = Flask(__name__)
 
 
 @app.route("/")
+@app.route("/index.html")
 def index():
     return send_from_directory(PUBLIC_DIR, "index.html")
 
@@ -38,6 +39,17 @@ def static_files(fname):
     if os.path.isfile(full):
         return send_from_directory(PUBLIC_DIR, fname)
     abort(404)
+
+
+@app.errorhandler(404)
+def fallback(_e):
+    # Any unmatched GET serves the app shell so the root path always loads
+    if request.method == "GET":
+        try:
+            return send_from_directory(PUBLIC_DIR, "index.html")
+        except Exception:
+            pass
+    return jsonify({"detail": "Not found"}), 404
 
 
 def _clean_list(items):
