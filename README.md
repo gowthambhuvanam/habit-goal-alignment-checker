@@ -4,6 +4,8 @@
 
 No AI, no API keys, no accounts. The intelligence is a rule-based matching engine that runs instantly and offline.
 
+**Live demo: https://habit-align.vercel.app**
+
 ---
 
 ## What it does
@@ -51,9 +53,10 @@ Then open `public/index.html` in a browser, or serve the folder with any static 
 ```
 habit-goal-alignment-checker/
 ├── api/
-│   ├── analyze.py   # Flask endpoint
+│   ├── analyze.py   # Flask app: API endpoint + serves the app shell
 │   ├── engine.py    # rule-based alignment engine (the core logic)
-│   └── graph.py     # NetworkX + Plotly graph builder
+│   ├── graph.py     # NetworkX + Plotly graph builder
+│   └── assets.py    # embedded index.html (generated from public/index.html)
 ├── public/
 │   ├── index.html
 │   ├── app.js
