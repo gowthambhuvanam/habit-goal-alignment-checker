@@ -41,15 +41,31 @@ def static_files(fname):
     abort(404)
 
 
+@app.route("/api/_debug")
+def debug():
+    info = {
+        "public_dir": PUBLIC_DIR,
+        "public_isdir": os.path.isdir(PUBLIC_DIR),
+        "index_isfile": os.path.isfile(os.path.join(PUBLIC_DIR, "index.html")),
+        "cwd": os.getcwd(),
+        "file": os.path.abspath(__file__),
+        "request_path": request.path,
+    }
+    try:
+        info["public_listing"] = os.listdir(PUBLIC_DIR)[:10]
+    except Exception as e:
+        info["public_listing_error"] = str(e)
+    return jsonify(info)
+
+
 @app.errorhandler(404)
 def fallback(_e):
     # Any unmatched GET serves the app shell so the root path always loads
     if request.method == "GET":
-        try:
+        idx = os.path.join(PUBLIC_DIR, "index.html")
+        if os.path.isfile(idx):
             return send_from_directory(PUBLIC_DIR, "index.html")
-        except Exception:
-            pass
-    return jsonify({"detail": "Not found"}), 404
+    return jsonify({"detail": "Not found", "path": request.path}), 404
 
 
 def _clean_list(items):
