@@ -3,69 +3,14 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from flask import Flask, request, jsonify, send_from_directory, abort
+from flask import Flask, request, jsonify
 
 from engine import analyze_alignment
 from graph import build_graph_figure
 
-
-def _find_public():
-    here = os.path.dirname(os.path.abspath(__file__))
-    candidates = [
-        os.path.join(here, "..", "public"),
-        os.path.join(os.getcwd(), "public"),
-        "/var/task/public",
-        "/vercel/path0/public",
-    ]
-    for c in candidates:
-        if os.path.isdir(c):
-            return os.path.abspath(c)
-    return os.path.abspath(candidates[0])
-
-
-PUBLIC_DIR = _find_public()
+# Vercel serves the static frontend (public/) directly. This function only
+# handles the API.
 app = Flask(__name__)
-
-
-@app.route("/")
-@app.route("/index.html")
-def index():
-    return send_from_directory(PUBLIC_DIR, "index.html")
-
-
-@app.route("/<path:fname>")
-def static_files(fname):
-    full = os.path.join(PUBLIC_DIR, fname)
-    if os.path.isfile(full):
-        return send_from_directory(PUBLIC_DIR, fname)
-    abort(404)
-
-
-@app.route("/api/_debug")
-def debug():
-    info = {
-        "public_dir": PUBLIC_DIR,
-        "public_isdir": os.path.isdir(PUBLIC_DIR),
-        "index_isfile": os.path.isfile(os.path.join(PUBLIC_DIR, "index.html")),
-        "cwd": os.getcwd(),
-        "file": os.path.abspath(__file__),
-        "request_path": request.path,
-    }
-    try:
-        info["public_listing"] = os.listdir(PUBLIC_DIR)[:10]
-    except Exception as e:
-        info["public_listing_error"] = str(e)
-    return jsonify(info)
-
-
-@app.errorhandler(404)
-def fallback(_e):
-    # Any unmatched GET serves the app shell so the root path always loads
-    if request.method == "GET":
-        idx = os.path.join(PUBLIC_DIR, "index.html")
-        if os.path.isfile(idx):
-            return send_from_directory(PUBLIC_DIR, "index.html")
-    return jsonify({"detail": "Not found", "path": request.path}), 404
 
 
 def _clean_list(items):
