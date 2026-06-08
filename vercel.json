@@ -1,5 +1,7 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" }
-  ]
+  "functions": {
+    "api/analyze.py": {
+      "includeFiles": "public/**"
+    }
+  }
 }
