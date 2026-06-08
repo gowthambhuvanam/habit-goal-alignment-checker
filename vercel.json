@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/analyze.py": {
-      "includeFiles": "public/**"
-    }
-  }
-}

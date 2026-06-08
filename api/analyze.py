@@ -3,36 +3,21 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from flask import Flask, request, jsonify, send_from_directory, abort
+from flask import Flask, request, jsonify, Response
 
 from engine import analyze_alignment
 from graph import build_graph_figure
+from assets import INDEX_HTML
 
-
-def _find_public():
-    here = os.path.dirname(os.path.abspath(__file__))
-    for c in [os.path.join(here, "..", "public"),
-              os.path.join(os.getcwd(), "public"),
-              "/var/task/public"]:
-        if os.path.isdir(c):
-            return os.path.abspath(c)
-    return os.path.abspath(os.path.join(here, "..", "public"))
-
-
-PUBLIC_DIR = _find_public()
+# Vercel serves the static assets (style.css, app.js) from public/ directly.
+# The app shell (index.html) is embedded here because the new Vercel Python
+# runtime does not bundle the public/ folder into the function.
 app = Flask(__name__)
 
 
 @app.route("/")
 def index():
-    return send_from_directory(PUBLIC_DIR, "index.html")
-
-
-@app.route("/<path:fname>")
-def static_files(fname):
-    if os.path.isfile(os.path.join(PUBLIC_DIR, fname)):
-        return send_from_directory(PUBLIC_DIR, fname)
-    abort(404)
+    return Response(INDEX_HTML, mimetype="text/html")
 
 
 def _clean_list(items):
